@@ -1,15 +1,19 @@
 {
   "name": "mini-vue3",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node ./scripts/dev reactivity --format esm"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^25.3.0",
+    "esbuild": "^0.27.3",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   }
 }

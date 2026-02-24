@@ -1,0 +1,22 @@
+{
+  "name": "@vaebe-vue3/reactivity",
+  "version": "1.0.0",
+  "description": "响应式模块",
+  "main": "index.js",
+  "module": "dist/reactivity.esm.js",
+  "files": [
+    "index.js",
+    "dist"
+  ],
+  "sideEffects": false,
+  "buildOptions": {
+    "name": "VueReactivity",
+    "formats": [
+      "es",
+      "cjs",
+      "umd"
+    ]
+  },
+  "author": "vaebe",
+  "license": "MIT"
+}
