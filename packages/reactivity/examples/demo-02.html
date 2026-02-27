@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <script type="module">
+    import { ref, effect } from '../dist/reactivity.esm.js'
+
+    const count = ref(1)
+
+    // effect(() => {
+    //   console.log('嵌套的 effect 1 value====', count.value)
+    //   effect(() => {
+    //     console.log('嵌套的 effect 2 value====', count.value)
+    //   })
+    // })
+
+    effect(() => {
+      console.log('嵌套的 effect 1 value====', count.value)
+    }, {
+      scheduler() {
+        console.log('scheduler 调度器')
+      }
+    })
+
+
+    const text = ref('text')
+
+    const runner = effect(() => {
+      console.log('text effect ====', text.value)
+      return '这是 effect 的返回值'
+    }, {
+      scheduler() {
+        const newValue = runner()
+        console.log('text scheduler 调度器', newValue)
+      }
+    })
+
+    setTimeout(() => {
+      count.value = 2
+      text.value = '1001'
+    }, 1000);
+  </script>
+
+</body>
+
+</html>

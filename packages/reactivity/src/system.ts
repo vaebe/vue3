@@ -1,8 +1,9 @@
 // 大概对应该 源码的 dep.ts
+import type { ReactiveEffect } from './effect'
 
 export interface Link {
   // 保存 effect
-  sub: Function
+  sub: ReactiveEffect
   // 下一个节点， 尾节点不存在 nextSub
   nextSub: Link | undefined
   // 上一个节点，头节点不存在 prevSub
@@ -43,14 +44,14 @@ export function link(dep, sub) {
  * 传播更新的函数
  * @param subs
  */
-export function propagate(subs) {
+export function propagate(subs: Link) {
   let link = subs
-  let queuedEffect = []
+  let queuedEffect: ReactiveEffect[] = []
 
   while (link) {
     queuedEffect.push(link.sub)
     link = link.nextSub
   }
 
-  queuedEffect.forEach(effect => effect())
+  queuedEffect.forEach(effect => effect.notify())
 }
