@@ -1,8 +1,8 @@
 {
-  "name": "mini-vue3",
+  "name": "vaebe-vue",
   "version": "1.0.0",
   "type": "module",
-  "description": "",
+  "description": "vaebe vue",
   "main": "index.js",
   "scripts": {
     "dev": "node ./scripts/dev reactivity --format esm"
