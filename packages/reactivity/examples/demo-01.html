@@ -15,7 +15,11 @@
     const count = ref(1)
 
     effect(() => {
-      console.log('count value====', count.value)
+      console.log('effect 1 value====', count.value)
+    })
+ 
+    effect(() => {
+      console.log('effect 2 value====', count.value)
     })
 
     setTimeout(() => {
