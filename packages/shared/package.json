@@ -1,0 +1,20 @@
+{
+  "name": "@vaebe-vue/shared",
+  "version": "1.0.0",
+  "description": "公共模块",
+  "main": "dist/shared.cjs.js",
+  "module": "dist/shared.esm.js",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "buildOptions": {
+    "name": "VueShared",
+    "formats": [
+      "esm-bundler",
+      "cjs"
+    ]
+  },
+  "author": "vaebe",
+  "license": "MIT"
+}

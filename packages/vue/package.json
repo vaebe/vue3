@@ -1,0 +1,25 @@
+{
+  "name": "vaebe-vue",
+  "version": "1.0.0",
+  "description": "vaebe vue3",
+  "main": "dist/shared.cjs.js",
+  "module": "dist/shared.esm.js",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "buildOptions": {
+    "name": "VaebeVue",
+    "formats": [
+      "esm-bundler",
+      "esm-bundler-runtime",
+      "cjs",
+      "global",
+      "global-runtime",
+      "esm-browser",
+      "esm-browser-runtime"
+    ]
+  },
+  "author": "vaebe",
+  "license": "MIT"
+}

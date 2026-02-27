@@ -8,7 +8,7 @@
     "strict": false, // 关闭严格模式
     "lib": ["ESNext", "DOM"], // 指定要使用的库文件
     "paths": {
-      "@vue/*": ["packages/*/src"]
+      "@vaebe-vue/*": ["packages/*/src"]
     },
     "baseUrl": "./"
   }

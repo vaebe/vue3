@@ -1,22 +1,25 @@
 {
-  "name": "@vaebe-vue3/reactivity",
+  "name": "@vaebe-vue/reactivity",
   "version": "1.0.0",
   "description": "响应式模块",
-  "main": "index.js",
+  "main": "dist/reactivity.cjs.js",
   "module": "dist/reactivity.esm.js",
   "files": [
-    "index.js",
     "dist"
   ],
   "sideEffects": false,
   "buildOptions": {
     "name": "VueReactivity",
     "formats": [
-      "es",
+      "esm-bundler",
+      "esm-browser",
       "cjs",
-      "umd"
+      "global"
     ]
   },
   "author": "vaebe",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@vaebe-vue/shared": "workspace:*"
+  }
 }
