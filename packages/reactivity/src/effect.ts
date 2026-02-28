@@ -1,7 +1,19 @@
+import { Link } from './system'
+
 // 用来保存当前正在执行的 effect
 export let activeSub
 
 export class ReactiveEffect {
+  /**
+   * 依赖项链表的头节点-单链表
+   */
+  deps: Link | undefined
+
+  /**
+   * 依赖项链表的尾节点
+   */
+  depsTail: Link | undefined
+
   constructor(public fn) {}
 
   run() {
@@ -11,9 +23,12 @@ export class ReactiveEffect {
     // 保存当前的 ReactiveEffect 让外部使用
     activeSub = this
 
+    // 将 依赖项链表的尾节点 设置为 undefined -- 当成一个标记使用
+    this.depsTail = undefined
+
     try {
       return this.fn()
-    } catch {
+    } finally {
       // 执行完成之后 - 恢复之前的 effect
       activeSub = prevSub
     }

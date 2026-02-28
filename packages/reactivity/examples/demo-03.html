@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>effect 复用</title>
+  <style>
+    #but {
+      margin: 100px 0 0 100px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <button id="but">点击按钮</button>
+
+  <script type="module">
+    import { ref, effect } from '../dist/reactivity.esm.js'
+
+    const count = ref(1)
+    const tt = ref(true)
+
+    const e = effect(() => {
+      count.value
+      tt.value
+
+      console.count('click value====')
+    })
+
+    but.onclick = function () {
+      tt.value = !tt.value
+    }
+  </script>
+
+</body>
+
+</html>
