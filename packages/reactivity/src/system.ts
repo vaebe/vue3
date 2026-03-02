@@ -1,5 +1,6 @@
 // 大概对应该 源码的 dep.ts
 import type { ReactiveEffect } from './effect'
+import type { RefImpl } from './ref'
 
 /**
  * 依赖项-存订阅者
@@ -37,7 +38,8 @@ export interface Link {
  * @param dep 依赖项，比如 ref、computed
  * @param sub 订阅者， effect
  */
-export function link(dep: Dep, sub: Sub) {
+export function link(dep: RefImpl, sub: ReactiveEffect) {
+  debugger
   /**
    * 复用节点
    * 1. 如果头节点有、尾节点没有 ，尝试复用头节点

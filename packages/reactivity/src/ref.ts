@@ -3,7 +3,7 @@ import { activeSub } from './effect'
 import { propagate, link } from './system'
 import type { Link } from './system'
 
-class RefImpl<T = any> {
+export class RefImpl<T = any> {
   _value: T
   public readonly [ReactiveFlags.IS_REF] = true
 
