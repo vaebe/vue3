@@ -1,4 +1,4 @@
-import { Link } from './system'
+import { Link, startTrack, endTrack } from './system'
 
 // 用来保存当前正在执行的 effect
 export let activeSub
@@ -23,12 +23,14 @@ export class ReactiveEffect {
     // 保存当前的 ReactiveEffect 让外部使用
     activeSub = this
 
-    // 将 依赖项链表的尾节点 设置为 undefined -- 当成一个标记使用
-    this.depsTail = undefined
+    // 开始追踪依赖
+    startTrack(this)
 
     try {
       return this.fn()
     } finally {
+      // 结束追踪,清理依赖
+      endTrack(this)
       // 执行完成之后 - 恢复之前的 effect
       activeSub = prevSub
     }
