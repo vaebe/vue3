@@ -107,12 +107,16 @@ export function link(dep: RefImpl, sub: ReactiveEffect) {
  * @param subs
  */
 export function propagate(subs: Link) {
+  console.log(subs, 'sdadsa')
   let link = subs
   let queuedEffect: ReactiveEffect[] = []
 
   while (link) {
-    // link.sub 是 ReactiveEffect
-    queuedEffect.push(link.sub as ReactiveEffect)
+    const sub = link.sub as ReactiveEffect
+    // 不处于追踪状态时 收集依赖执行
+    if (!sub.tracking) {
+      queuedEffect.push(sub)
+    }
     link = link.nextSub
   }
 
@@ -123,7 +127,9 @@ export function propagate(subs: Link) {
  * 开始追踪依赖,将 depsTail 设置为 undefined
  * @param sub ReactiveEffect
  */
-export function startTrack(sub) {
+export function startTrack(sub: ReactiveEffect) {
+  // 开始追踪依赖时将 tracking 设置为 true
+  sub.tracking = true
   sub.depsTail = undefined
 }
 
@@ -131,7 +137,10 @@ export function startTrack(sub) {
  * 结束依赖追踪找到需要清理的依赖
  * @param sub
  */
-export function endTrack(sub: Sub) {
+export function endTrack(sub: ReactiveEffect) {
+  // 结束追踪依赖时将 tracking 设置为 false
+  sub.tracking = false
+
   if (sub.depsTail?.nextDep) {
     // 如果 depsTail 尾节点 还有 nextDep，说明后面的依赖需要清理
     clearTracking(sub.depsTail.nextDep)

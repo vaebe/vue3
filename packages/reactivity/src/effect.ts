@@ -14,6 +14,9 @@ export class ReactiveEffect {
    */
   depsTail: Link | undefined
 
+  // 追踪状态
+  tracking: boolean
+
   constructor(public fn) {}
 
   run() {
