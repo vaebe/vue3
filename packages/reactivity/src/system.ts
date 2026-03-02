@@ -33,6 +33,8 @@ export interface Link {
   nextDep: Link | undefined
 }
 
+let linkPool: Link | undefined
+
 /**
  * 建立链表链接关系
  * @param dep 依赖项，比如 ref、computed
@@ -51,12 +53,22 @@ export function link(dep: RefImpl, sub: ReactiveEffect) {
     return
   }
 
-  const newLink: Link = {
-    sub,
-    nextSub: undefined,
-    prevSub: undefined,
-    dep,
-    nextDep,
+  let newLink: Link
+
+  if (linkPool) {
+    newLink = linkPool
+    linkPool = linkPool.nextDep
+    newLink.nextDep = nextDep
+    newLink.dep = dep
+    newLink.sub = sub
+  } else {
+    newLink = {
+      sub,
+      nextSub: undefined,
+      prevSub: undefined,
+      dep,
+      nextDep,
+    }
   }
 
   /**
@@ -166,8 +178,11 @@ export function clearTracking(link: Link) {
     // 断开 Link 节点与 Dep 和 Sub 的双向引用
     link.dep = link.sub = undefined
 
-    // 断开 Link 节点在 deps 链表中的连接
-    link.nextDep = undefined
+    /**
+     * 把不要的节点保存给 linkPool 在 link 函数中复用
+     */
+    link.nextDep = linkPool
+    linkPool = link
 
     // 移动到下一个需要清理的节点
     link = nextDep
