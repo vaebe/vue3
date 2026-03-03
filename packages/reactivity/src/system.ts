@@ -107,7 +107,6 @@ export function link(dep: RefImpl, sub: ReactiveEffect) {
  * @param subs
  */
 export function propagate(subs: Link) {
-  console.log(subs, 'sdadsa')
   let link = subs
   let queuedEffect: ReactiveEffect[] = []
 

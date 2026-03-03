@@ -2,6 +2,8 @@ import { ReactiveFlags } from './constants'
 import { activeSub } from './effect'
 import { propagate, link } from './system'
 import type { Link } from './system'
+import { isObject, hasChanged } from '@vaebe-vue/shared'
+import { reactive } from './reactive'
 
 export class RefImpl<T = any> {
   _value: T
@@ -18,7 +20,7 @@ export class RefImpl<T = any> {
   subsTail: Link
 
   constructor(value: T) {
-    this._value = value
+    this._value = isObject(value) ? reactive(value) : value
   }
 
   // 获取 value
@@ -34,9 +36,12 @@ export class RefImpl<T = any> {
 
   // 设置 value
   set value(newValue) {
-    // 设置的时候将值 保存到 _value
-    this._value = newValue
-    triggerRef(this)
+    // 数据发生改变才出发更新
+    if (hasChanged(newValue, this._value)) {
+      // 设置的时候将值 保存到 _value
+      this._value = isObject(newValue) ? reactive(newValue) : newValue
+      triggerRef(this)
+    }
   }
 }
 

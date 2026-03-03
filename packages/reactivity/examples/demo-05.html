@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>简单的 reactive 实现</title>
+</head>
+
+<body>
+
+  <script type="module">
+    import { reactive, effect, ref } from '../dist/reactivity.esm.js'
+
+    const age = ref(1)
+
+    const obj = reactive({
+      age: 0,
+      c: {
+        a: 1
+      },
+      b: age
+    })
+
+    const obj2 = reactive(obj)
+
+    effect(() => {
+      console.log('effect 1 value====', obj.c.a)
+    })
+
+    setTimeout(() => {
+      obj.c.a = 10
+    }, 1000);
+  </script>
+
+</body>
+
+</html>
