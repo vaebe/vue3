@@ -42,3 +42,12 @@ export function createReactiveObject(target) {
 
   return proxy
 }
+
+/**
+ * 判断是否是 reactive
+ * @param value
+ * @returns
+ */
+export function isReactive(value) {
+  return reactiveSet.has(value)
+}

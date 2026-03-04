@@ -24,9 +24,17 @@ export class ReactiveEffect implements Sub {
   // 使用脏检查来确定数据是否需要更新
   dirty: boolean = true
 
+  // 表示当前是否激活
+  active: boolean = true
+
   constructor(public fn) {}
 
   run() {
+    // 如果未激活，则不收集依赖，直接调用 fn
+    if (!this.active) {
+      return this.fn()
+    }
+
     // 将当前的 effect 保存起来用于处理嵌套的逻辑
     const prevSub = activeSub
 
@@ -43,6 +51,18 @@ export class ReactiveEffect implements Sub {
       endTrack(this)
       // 执行完成之后 - 恢复之前的 effect
       activeSub = prevSub
+    }
+  }
+
+  stop() {
+    // 是激活状态才可以停止
+    if (this.active) {
+      // 开始追踪，会把 depsTail 设置为 undefined
+      startTrack(this)
+      // 结束追踪，中间没有收集依赖，所以 depsTail 为 true，deps 有，清理所有依赖，依赖清理完成，就不会再被触发了
+      endTrack(this)
+
+      this.active = false
     }
   }
 
