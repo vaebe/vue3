@@ -1,11 +1,11 @@
-// 大概对应该 源码的 dep.ts
 import type { ReactiveEffect } from './effect'
 import type { RefImpl } from './ref'
+import type { ComputedRefImpl } from './computed'
 
 /**
  * 依赖项-存订阅者
  */
-interface Dep {
+export interface Dependency {
   // 订阅者头节点
   subs: Link | undefined
   // 订阅者尾节点
@@ -15,9 +15,12 @@ interface Dep {
 /**
  * 订阅者-存依赖项
  */
-interface Sub {
+export interface Sub {
   deps: Link | undefined
   depsTail: Link | undefined
+
+  // 追踪状态
+  tracking: boolean
 }
 
 export interface Link {
@@ -28,7 +31,7 @@ export interface Link {
   // 上一个订阅者节点，头节点不存在 prevSub
   prevSub: Link | undefined
   // 依赖项
-  dep: Dep | undefined
+  dep: Dependency | undefined
   // 下一个依赖项节点
   nextDep: Link | undefined
 }
@@ -40,7 +43,7 @@ let linkPool: Link | undefined
  * @param dep 依赖项，比如 ref、computed
  * @param sub 订阅者， effect
  */
-export function link(dep: RefImpl, sub: ReactiveEffect) {
+export function link(dep: RefImpl | ComputedRefImpl, sub: ReactiveEffect) {
   /**
    * 复用节点
    * 1. 如果头节点有、尾节点没有 ，尝试复用头节点
@@ -103,6 +106,17 @@ export function link(dep: RefImpl, sub: ReactiveEffect) {
 }
 
 /**
+ * 处理 computed 更新逻辑
+ * @param sub
+ */
+function processComputedUpdate(sub) {
+  // 如果 subs 有，并且值变了，通知更新, sub.update() 返回 true 表示数据有变化
+  if (sub.subs && sub.update()) {
+    propagate(sub.subs)
+  }
+}
+
+/**
  * 传播更新的函数
  * @param subs
  */
@@ -111,10 +125,23 @@ export function propagate(subs: Link) {
   let queuedEffect: ReactiveEffect[] = []
 
   while (link) {
-    const sub = link.sub as ReactiveEffect
-    // 不处于追踪状态时 收集依赖执行
-    if (!sub.tracking) {
-      queuedEffect.push(sub)
+    const sub = link.sub as ReactiveEffect | ComputedRefImpl
+    /**
+     * 不处于追踪状态 && 数据有变化 收集依赖执行
+     *  effect(() => {
+          console.log('effect 1 value====', c.value)
+          console.log('effect 1 value====', c.value)
+        })
+     * todo sub.dirty, 解决同一个 effect 多次收集 重复执行的问题, 与源码实现不同
+     */
+    if (!sub.tracking && !sub.dirty) {
+      sub.dirty = true
+
+      if ('update' in sub) {
+        processComputedUpdate(sub)
+      } else {
+        queuedEffect.push(sub)
+      }
     }
     link = link.nextSub
   }
@@ -126,7 +153,7 @@ export function propagate(subs: Link) {
  * 开始追踪依赖,将 depsTail 设置为 undefined
  * @param sub ReactiveEffect
  */
-export function startTrack(sub: ReactiveEffect) {
+export function startTrack(sub: ReactiveEffect | ComputedRefImpl) {
   // 开始追踪依赖时将 tracking 设置为 true
   sub.tracking = true
   sub.depsTail = undefined
@@ -136,9 +163,12 @@ export function startTrack(sub: ReactiveEffect) {
  * 结束依赖追踪找到需要清理的依赖
  * @param sub
  */
-export function endTrack(sub: ReactiveEffect) {
+export function endTrack(sub: ReactiveEffect | ComputedRefImpl) {
   // 结束追踪依赖时将 tracking 设置为 false
   sub.tracking = false
+
+  // 更新完成设置为 false
+  sub.dirty = false
 
   if (sub.depsTail?.nextDep) {
     // 如果 depsTail 尾节点 还有 nextDep，说明后面的依赖需要清理

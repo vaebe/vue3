@@ -1,11 +1,11 @@
 import { ReactiveFlags } from './constants'
 import { activeSub } from './effect'
 import { propagate, link } from './system'
-import type { Link } from './system'
+import type { Link, Dependency } from './system'
 import { isObject, hasChanged } from '@vaebe-vue/shared'
 import { reactive } from './reactive'
 
-export class RefImpl<T = any> {
+export class RefImpl<T = any> implements Dependency {
   _value: T
   public readonly [ReactiveFlags.IS_REF] = true
 

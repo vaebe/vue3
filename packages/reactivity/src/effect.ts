@@ -1,9 +1,13 @@
-import { Link, startTrack, endTrack } from './system'
+import { Link, startTrack, endTrack, Sub } from './system'
 
 // 用来保存当前正在执行的 effect
 export let activeSub
 
-export class ReactiveEffect {
+export function setActiveSub(sub) {
+  activeSub = sub
+}
+
+export class ReactiveEffect implements Sub {
   /**
    * 依赖项链表的头节点-单链表
    */
@@ -16,6 +20,9 @@ export class ReactiveEffect {
 
   // 追踪状态
   tracking: boolean
+
+  // 使用脏检查来确定数据是否需要更新
+  dirty: boolean = true
 
   constructor(public fn) {}
 

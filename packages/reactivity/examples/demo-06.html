@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>computed 实现</title>
+</head>
+
+<body>
+
+  <script type="module">
+    import { reactive, effect, ref, computed } from '../dist/reactivity.esm.js'
+
+    const age = ref(0)
+
+    const c = computed(() => {
+      console.log(age.value)
+      return age.value + 1
+    })
+
+    console.log('effect 1 value====', c.value)
+    console.log('effect 1 value====', c.value)
+    console.log('effect 1 value====', c.value)
+    console.log('effect 1 value====', c.value)
+
+    effect(() => {
+      console.log('effect 1 value====', c.value)
+      console.log('effect 1 value====', c.value)
+    })
+
+
+    setTimeout(() => {
+      console.log(age.value)
+    }, 1000);
+  </script>
+
+</body>
+
+</html>
