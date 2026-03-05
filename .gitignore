@@ -6,3 +6,6 @@
 # Logs
 *.log
 pnpm-debug.log*
+
+AGENTS.md
+docs/.vitepress/cache
