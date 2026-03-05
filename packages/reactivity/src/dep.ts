@@ -75,14 +75,39 @@ export function trigger(target, key) {
     return
   }
 
-  const dep = depsMap.get(key)
-  // dep 不存在，表示这个 key 没有在 sub 中访问过
-  if (!dep) {
-    return
-  }
+  // 判断当前的数据是否是数组
+  const targetIsArray = Array.isArray(target)
+  const newLength = target.target
 
   /**
-   * 找到 dep 的 subs 通知它们重新执行
+   * 当数组的 length 被修改（通常是缩短数组）时，需要通知相关的副作用重新执行。
    */
-  propagate(dep.subs)
+  if (targetIsArray && key === 'length') {
+    /**
+     * 一开始：['a', 'b', 'c', 'd'] length = 4
+     * 更新后：['a', 'b'] length = 2 , 索引 2 和 3 的元素被删除
+     *
+     * 遍历 depsMap 中所有的依赖（dep）和对应的键（depKey）
+     */
+    depsMap.forEach((dep, depKey) => {
+      /**
+       * 1. `depKey === 'length'`：直接依赖 length 属性的副作用需要触发
+       * 2. `depKey >= newLength`：访问的索引 >= 新长度，说明该位置的元素已被"删除"，需要触发副作用
+       */
+      if (depKey === 'length' || depKey >= newLength) {
+        propagate(dep.subs)
+      }
+    })
+  } else {
+    const dep = depsMap.get(key)
+    // dep 不存在，表示这个 key 没有在 sub 中访问过
+    if (!dep) {
+      return
+    }
+
+    /**
+     * 找到 dep 的 subs 通知它们重新执行
+     */
+    propagate(dep.subs)
+  }
 }

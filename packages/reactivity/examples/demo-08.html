@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数组的响应式</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+    }
+
+    .section {
+      margin-bottom: 40px;
+      border: 1px solid #ccc;
+      padding: 15px;
+    }
+
+    .output {
+      background: #f5f5f5;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      margin: 5px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>数组响应式测试</h1>
+
+  <!-- 测试1：显式修改 length -->
+  <div class="section">
+    <h2>测试1：显式修改 arr.length</h2>
+    <p>点击按钮缩短数组，观察依赖是否重新执行</p>
+    <button onclick="test1Shorten()">执行 arr.length = 2</button>
+    <div class="output" id="output1"></div>
+  </div>
+
+  <!-- 测试2：隐式修改 length -->
+  <div class="section">
+    <h2>测试2：隐式修改 length (push/pop)</h2>
+    <p>使用数组方法隐式修改 length，观察依赖是否重新执行</p>
+    <button onclick="test2Push()">push('e')</button>
+    <button onclick="test2Pop()">pop()</button>
+    <div class="output" id="output2"></div>
+  </div>
+
+  <script type="module">
+    import { reactive, effect } from '../dist/reactivity.esm.js'
+
+    // ========== 测试1 ==========
+    const arr1 = reactive(['a', 'b', 'c', 'd'])
+    let count1 = 0
+
+    // 这个 effect 依赖 arr1[2]
+    effect(() => {
+      count1++
+      document.getElementById('output1').innerHTML = `
+        <p>数组: ${JSON.stringify(arr1)}</p>
+        <p>arr[2] = ${arr1[2]}</p>
+        <p><b>effect 执行次数: ${count1}</b></p>
+      `
+    })
+
+    // 暴露到全局，让按钮可以调用
+    window.test1Shorten = () => {
+      console.log('执行 arr.length = 2')
+      arr1.length = 2
+    }
+
+    // ========== 测试2 ==========
+    const arr2 = reactive(['x', 'y', 'z'])
+    let count2 = 0
+
+    // 这个 effect 依赖 arr2.length
+    effect(() => {
+      count2++
+      document.getElementById('output2').innerHTML = `
+        <p>数组: ${JSON.stringify(arr2)}</p>
+        <p>arr.length = ${arr2.length}</p>
+        <p><b>effect 执行次数: ${count2}</b></p>
+      `
+    })
+
+    // 暴露到全局，让按钮可以调用
+    window.test2Push = () => {
+      console.log('执行 push("e")')
+      arr2.push('e')
+    }
+    window.test2Pop = () => {
+      console.log('执行 pop()')
+      arr2.pop()
+    }
+  </script>
+
+</body>
+
+</html>

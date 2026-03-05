@@ -41,8 +41,11 @@ export const mutableHandlers = {
     return res
   },
   set(target, key, newValue, receiver) {
+    const targetIsArray = Array.isArray(target)
+    // set 前,保存旧的数据长度
+    const oldLength = targetIsArray ? target.length : 0
+
     const oldValue = Reflect.get(target, key, receiver)
-    const res = Reflect.set(target, key, newValue, receiver)
 
     /**
      * 如果更新了 state.a 它之前是个 ref，那么会修改原始的 ref.value 的值 等于 newValue
@@ -54,13 +57,30 @@ export const mutableHandlers = {
      */
     if (isRef(oldValue) && !isRef(newValue)) {
       oldValue.value = newValue
-      return res
+      return true
     }
+
+    const res = Reflect.set(target, key, newValue, receiver)
 
     // 只有新值 和 旧值不一样的时候才出发更新
     if (hasChanged(oldValue, newValue)) {
       // 先在上边设置数据 在触发更新
       trigger(target, key)
+    }
+
+    // set 数据后,保存新的数据长度
+    const newLength = targetIsArray ? target.length : 0
+    /**
+     * 隐式修改 `length`：当使用 push、pop、shift、unshift 等方法时，会隐式改变length，需要触发相关依赖
+     * 如果 oldLength !== newLength 且修改的不是 length 本身，说明是隐式修改（如 push），手动触发 trigger(target, 'length')
+     *
+     * 最终有 dep.ts trigger 来执行相关的逻辑
+     */
+    if (targetIsArray && oldLength !== newLength && key !== 'length') {
+      /**
+       * 如果更新之前和更新之后，length 不一样，代表隐式更新了，手动触发
+       */
+      trigger(target, 'length')
     }
 
     return res
