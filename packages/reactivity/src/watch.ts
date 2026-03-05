@@ -53,6 +53,17 @@ export function watch(source, cb, options) {
     getter = () => traverse(baseGetter(), depth)
   }
 
+  // 保存执行后的清理函数
+  let cleanup = null
+
+  /**
+   * 清理函数, 这里将用户传入清理函数保存起来  https://cn.vuejs.org/api/options-state.html#watch
+   * @param cb onCleanup: (cleanupFn: () => void) => void
+   */
+  function onCleanup(cb) {
+    cleanup = cb
+  }
+
   // 创建一个 effect
   const effect = new ReactiveEffect(getter)
 
@@ -60,10 +71,15 @@ export function watch(source, cb, options) {
   let oldValue
 
   function job() {
+    if (cleanup) {
+      cleanup()
+      cleanup = null
+    }
+
     // 执行 effect 获取新的值
     const newValue = effect.run()
     // 调用回调函数 传入新值和旧值
-    cb(newValue, oldValue)
+    cb(newValue, oldValue, onCleanup)
 
     // 将 newValue 赋值给 oldValue 下次执行时 新的就变成了旧的值
     oldValue = newValue

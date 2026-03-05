@@ -48,8 +48,12 @@
     })
 
     // deep 
-    const c = watch(state, (newValue, oldValue) => {
-      console.log(newValue, oldValue.a.c)
+    const c = watch(state, (newValue, oldValue, onCleanup) => {
+      console.log(newValue)
+
+      onCleanup(() => {
+        console.log('清理函数执行!!!')
+      })
     }, {
       deep: true
     })
