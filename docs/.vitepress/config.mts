@@ -38,6 +38,10 @@ export default defineConfig({
           { text: '辅助函数', link: '/reactivity/helpers' },
         ],
       },
+      {
+        text: '浏览器运行时',
+        link: '/runtime-dom/',
+      },
     ],
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/vaebe/vue3' }],

@@ -33,7 +33,7 @@ Dependency (dep) ←→ Link ←→ Subscriber (sub)
 
 ### 依赖追踪流程
 
-```
+```bash
 1. 读取响应式数据
    └→ track(target, key)
       └→ link(dep, activeSub)
