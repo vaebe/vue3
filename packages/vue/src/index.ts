@@ -1,1 +1,1 @@
-console.log('vue')
+export * from '@vaebe-vue/runtime-dom'

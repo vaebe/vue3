@@ -1,0 +1,23 @@
+{
+  "name": "@vaebe-vue/runtime-dom",
+  "version": "1.0.0",
+  "description": "运行时 dom",
+  "main": "dist/runtime-dom.cjs.js",
+  "module": "dist/runtime-dom.esm.js",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "buildOptions": {
+    "name": "VueRuntimeDOM",
+    "formats": [
+      "esm-bundler",
+      "cjs"
+    ]
+  },
+  "author": "vaebe",
+  "license": "MIT",
+  "dependencies": {
+    "@vaebe-vue/runtime-core": "workspace:*"
+  }
+}
