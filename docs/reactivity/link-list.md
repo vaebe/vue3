@@ -6,7 +6,7 @@
 
 ### 三种角色
 
-```
+```bash
 Dependency (dep) ←→ Link ←→ Subscriber (sub)
 ```
 

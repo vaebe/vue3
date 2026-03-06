@@ -132,7 +132,7 @@ update() {
 
 Computed 可以作为其他 Computed 或 Effect 的依赖：
 
-```
+```bash
 ref → computed → computed → effect
 ```
 
