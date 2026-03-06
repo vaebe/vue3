@@ -17,15 +17,16 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: '开始',
+        text: '简介',
+        link: '/guide/',
         items: [
-          { text: '简介', link: '/guide/' },
           { text: '项目工程搭建', link: '/guide/project-setup' },
           { text: '配置 esbuild 打包', link: '/guide/esbuild' },
         ],
       },
       {
         text: '响应式系统',
+        link: '/reactivity/',
         items: [
           { text: 'Ref 实现', link: '/reactivity/ref' },
           { text: 'Effect 实现', link: '/reactivity/effect' },
