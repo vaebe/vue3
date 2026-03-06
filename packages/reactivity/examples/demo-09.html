@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>toRef、toRefs、unRef、proxyRefs实现</title>
+</head>
+
+<body>
+
+  <script type="module">
+    import { effect, reactive, toRef, toRefs, proxyRefs } from '../dist/reactivity.esm.js'
+
+    const obj = reactive({
+      name: '张三',
+      age: 19,
+      sex: 1
+    })
+
+    const name = toRef(obj, 'name')
+
+    const { age } = toRefs(obj)
+
+    const state = proxyRefs({
+      ...toRefs(obj)
+    })
+
+
+    effect(() => {
+      // console.log('name value====', name.value, age.value)
+      console.log(state.age, state.name)
+    })
+
+    setTimeout(() => {
+      // name.value = '李四'
+      // age.value = 20
+
+      state.age = 20
+    }, 1000);
+  </script>
+
+</body>
+
+</html>

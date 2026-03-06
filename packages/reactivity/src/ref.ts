@@ -74,3 +74,88 @@ function triggerRef(dep) {
     propagate(dep.subs)
   }
 }
+
+class ObjectRefImpl {
+  [ReactiveFlags.IS_REF] = true
+
+  constructor(
+    public _object,
+    public _key,
+  ) {}
+
+  get value() {
+    return this._object[this._key]
+  }
+
+  set value(newValue) {
+    this._object[this._key] = newValue
+  }
+}
+
+/**
+ * 响应式对象转 ref https://cn.vuejs.org/api/reactivity-utilities.html#toref
+ * @param target
+ * @param key
+ */
+export function toRef(target, key) {
+  return new ObjectRefImpl(target, key)
+}
+
+/**
+ * 将响应式数据解构返回
+ * @param target 必须是响应式对象
+ * @returns
+ */
+export function toRefs(target) {
+  const res = {}
+
+  // 遍历对象生成 ref
+  for (const key in target) {
+    res[key] = new ObjectRefImpl(target, key)
+  }
+
+  return res
+}
+
+/**
+ * 如果参数是 ref，则返回内部值，否则返回参数本身。这是 val = isRef(val) ? val.value : val 计算的一个语法糖。
+ * @param r
+ * @returns
+ */
+export function unRef(val) {
+  return isRef(val) ? val.value : val
+}
+
+/**
+ * 代理 Refs, 去除访问 toRefs 转换后数据 需要使用 .value 访问的情况
+ * reactive -> toRefs -> proxyRefs
+ * @param target
+ * @returns
+ */
+export function proxyRefs(target) {
+  return new Proxy(target, {
+    get(...args) {
+      const val = Reflect.get(...args)
+      // 使用 unRef 自动解包 ref
+      return unRef(val)
+    },
+    set(target, key, newValue, receiver) {
+      const oldValue = target[key]
+
+      /**
+       * 如果更新了 state.a 它之前是个 ref，那么会修改原始的 ref.value 的值 等于 newValue
+       * 如果 newValue 是一个 ref，那就算了
+       *
+       * 之前的 key 存的是 ref
+       * 1. 给这个 key 赋值数据时 同步给之前的 ref 并由 ref 触发更新
+       * 2. 如果赋值一个新的 ref 则无需同步继续往下走
+       */
+      if (isRef(oldValue) && !isRef(newValue)) {
+        oldValue.value = newValue
+        return true
+      }
+
+      return Reflect.set(target, key, receiver)
+    },
+  })
+}
