@@ -33,9 +33,25 @@ importers:
         specifier: workspace:*
         version: link:../shared
 
+  packages/runtime-core:
+    dependencies:
+      '@vaebe-vue/reactivity':
+        specifier: workspace:*
+        version: link:../reactivity
+
+  packages/runtime-dom:
+    dependencies:
+      '@vaebe-vue/runtime-core':
+        specifier: workspace:*
+        version: link:../runtime-core
+
   packages/shared: {}
 
-  packages/vue: {}
+  packages/vue:
+    dependencies:
+      '@vaebe-vue/runtime-dom':
+        specifier: workspace:*
+        version: link:../runtime-dom
 
 packages:
 

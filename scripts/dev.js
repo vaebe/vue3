@@ -52,7 +52,7 @@ esbuild
   .context({
     entryPoints: [entry], // 入口文件
     outfile, // 输出文件
-    format, // 打包格式 cjs esm iife    
+    format, // 打包格式 cjs esm iife
     platform: format === 'cjs' ? 'node' : 'browser', // 打包平台 node browser
     sourcemap: true, // 开启 sourcemap 方便调试
     bundle: true, // 把所有的依赖，打包到一个文件中

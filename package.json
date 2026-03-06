@@ -5,10 +5,10 @@
   "description": "vaebe vue",
   "main": "index.js",
   "scripts": {
-    "dev": "node ./scripts/dev reactivity --format esm"
+    "dev": "node ./scripts/dev --format esm"
   },
   "keywords": [],
-  "author": "",
+  "author": "vaebe",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^25.3.0",
