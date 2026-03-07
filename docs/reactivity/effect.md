@@ -106,18 +106,163 @@ effect(() => {
 
 ### 3. 分支切换
 
-当条件分支变化时，自动清理不再需要的依赖：
+分支切换是响应式系统中的一个重要特性，当条件分支变化时，需要自动清理不再需要的依赖，并添加新的依赖。
+
+#### 什么是分支切换？
+
+考虑以下经典示例：
 
 ```typescript
-const state = reactive({ flag: true, a: 1, b: 2 })
+const flag = ref(true)
+const name = ref('zhangsan')
+const age = ref(18)
 
 effect(() => {
-  console.log(state.flag ? state.a : state.b)
+  if (flag.value) {
+    console.log(name.value)  // 分支 A
+  } else {
+    console.log(age.value)   // 分支 B
+  }
 })
-
-// 当 flag 变为 false 时，会清理 a 的依赖，添加 b 的依赖
-state.flag = false
 ```
+
+当 `flag` 从 `true` 变为 `false` 时：
+
+- **旧依赖**：`flag` + `name`
+- **新依赖**：`flag` + `age`
+
+核心问题：**需要自动清理 `name` 的依赖，添加 `age` 的依赖**
+
+#### 核心实现机制
+
+本实现通过 **"标记-复用-清理"** 三步来完成分支切换：
+
+##### 数据结构
+
+```
+ReactiveEffect (订阅者 Sub)
+    deps ──────► Link1 ──► Link2 ──► Link3
+                   │         │
+                   ▼         ▼
+                dep(A)    dep(B)
+                (依赖项)   (依赖项)
+```
+
+- `deps`：依赖链表头节点
+- `depsTail`：依赖链表尾节点（**关键！**）
+
+##### 第一步：startTrack - 标记阶段
+
+```typescript
+export function startTrack(sub) {
+  sub.tracking = true
+  sub.depsTail = undefined  // 关键：尾节点置空，但保留头节点 deps
+}
+```
+
+**效果**：
+- `deps` 仍然指向旧链表
+- `depsTail = undefined`，准备重新收集依赖
+
+##### 第二步：link - 复用阶段
+
+当 effect 重新执行时，会再次访问响应式数据，触发 `link` 函数：
+
+```typescript
+export function link(dep, sub) {
+  const currentDep = sub.depsTail
+  // 关键：从头节点或 depsTail.nextDep 开始找
+  const nextDep = currentDep === undefined ? sub.deps : currentDep.nextDep
+  
+  // 如果找到相同的 dep，直接复用！
+  if (nextDep && nextDep.dep === dep) {
+    sub.depsTail = nextDep  // 移动尾节点
+    return
+  }
+  
+  // 否则创建新节点...
+}
+```
+
+**复用逻辑**：
+
+```
+第一次执行 (flag=true): 
+  deps → [flag] → [name] → null
+              depsTail 指向 name
+
+第二次执行 (flag=false):
+  startTrack 后: 
+    deps → [flag] → [name] → null, depsTail = undefined
+  
+  访问 flag: 
+    - nextDep = deps (从头开始)
+    - nextDep.dep === flag ✓ 复用!
+    - depsTail = flag 节点
+  
+  访问 age:
+    - nextDep = depsTail.nextDep = name 节点
+    - name.dep !== age，不复用
+    - 创建新节点，添加到链表
+    - depsTail = age 节点
+
+此时链表：
+  deps → [flag] → [name] → [age]
+                      ↑        ↑
+                  旧节点   depsTail(新)
+```
+
+##### 第三步：endTrack - 清理阶段
+
+```typescript
+export function endTrack(sub) {
+  sub.tracking = false
+  sub.dirty = false
+
+  // 关键：depsTail 之后的节点都是旧依赖，需要清理
+  if (sub.depsTail?.nextDep) {
+    clearTracking(sub.depsTail.nextDep)
+    sub.depsTail.nextDep = undefined
+  } else if (!sub.depsTail && sub.deps) {
+    // 极端情况：没有任何依赖被复用，清理全部
+    clearTracking(sub.deps)
+    sub.deps = undefined
+  }
+}
+```
+
+**清理逻辑图示**：
+
+```
+执行完 link 后的链表：
+  deps → [flag] → [name] → [age]
+                      ↑
+               depsTail 在这里
+
+endTrack 检测到 depsTail.nextDep 存在
+→ 从 name 开始清理（包括之后的节点）
+
+最终结果：
+  deps → [flag] → [age]
+                   ↑
+              depsTail
+```
+
+**`name` 依赖被成功清理！**
+
+#### 设计思想总结
+
+| 步骤 | 操作 | 目的 |
+|------|------|------|
+| startTrack | `depsTail = undefined` | 标记"从这里开始重新收集" |
+| link | 复用匹配的节点 | 保留仍然有效的依赖 |
+| endTrack | 清理 `depsTail.nextDep` 之后的所有节点 | 删除不再需要的依赖 |
+
+这种设计的精妙之处在于：
+
+1. **不需要额外的数据结构**记录旧依赖
+2. **原地复用节点**，减少内存分配
+3. **线性时间复杂度**，只遍历一次链表
 
 ### 4. 无限循环递归解决
 
