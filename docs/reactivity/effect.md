@@ -7,9 +7,16 @@
 ```typescript
 import { effect, stop } from '@vaebe-vue/reactivity'
 
-const runner = effect(() => {
-  // 副作用逻辑
-}, { scheduler: () => { /* 自定义调度 */ } })
+const runner = effect(
+  () => {
+    // 副作用逻辑
+  },
+  {
+    scheduler: () => {
+      /* 自定义调度 */
+    },
+  },
+)
 
 runner() // 手动执行
 runner.effect.stop() // 停止追踪
@@ -119,9 +126,9 @@ const age = ref(18)
 
 effect(() => {
   if (flag.value) {
-    console.log(name.value)  // 分支 A
+    console.log(name.value) // 分支 A
   } else {
-    console.log(age.value)   // 分支 B
+    console.log(age.value) // 分支 B
   }
 })
 ```
@@ -139,7 +146,7 @@ effect(() => {
 
 ##### 数据结构
 
-```
+```bash
 ReactiveEffect (订阅者 Sub)
     deps ──────► Link1 ──► Link2 ──► Link3
                    │         │
@@ -156,11 +163,12 @@ ReactiveEffect (订阅者 Sub)
 ```typescript
 export function startTrack(sub) {
   sub.tracking = true
-  sub.depsTail = undefined  // 关键：尾节点置空，但保留头节点 deps
+  sub.depsTail = undefined // 关键：尾节点置空，但保留头节点 deps
 }
 ```
 
 **效果**：
+
 - `deps` 仍然指向旧链表
 - `depsTail = undefined`，准备重新收集依赖
 
@@ -173,33 +181,33 @@ export function link(dep, sub) {
   const currentDep = sub.depsTail
   // 关键：从头节点或 depsTail.nextDep 开始找
   const nextDep = currentDep === undefined ? sub.deps : currentDep.nextDep
-  
+
   // 如果找到相同的 dep，直接复用！
   if (nextDep && nextDep.dep === dep) {
-    sub.depsTail = nextDep  // 移动尾节点
+    sub.depsTail = nextDep // 移动尾节点
     return
   }
-  
+
   // 否则创建新节点...
 }
 ```
 
 **复用逻辑**：
 
-```
-第一次执行 (flag=true): 
+```bash
+第一次执行 (flag=true):
   deps → [flag] → [name] → null
               depsTail 指向 name
 
 第二次执行 (flag=false):
-  startTrack 后: 
+  startTrack 后:
     deps → [flag] → [name] → null, depsTail = undefined
-  
-  访问 flag: 
+
+  访问 flag:
     - nextDep = deps (从头开始)
     - nextDep.dep === flag ✓ 复用!
     - depsTail = flag 节点
-  
+
   访问 age:
     - nextDep = depsTail.nextDep = name 节点
     - name.dep !== age，不复用
@@ -233,7 +241,7 @@ export function endTrack(sub) {
 
 **清理逻辑图示**：
 
-```
+```bash
 执行完 link 后的链表：
   deps → [flag] → [name] → [age]
                       ↑
@@ -252,11 +260,11 @@ endTrack 检测到 depsTail.nextDep 存在
 
 #### 设计思想总结
 
-| 步骤 | 操作 | 目的 |
-|------|------|------|
-| startTrack | `depsTail = undefined` | 标记"从这里开始重新收集" |
-| link | 复用匹配的节点 | 保留仍然有效的依赖 |
-| endTrack | 清理 `depsTail.nextDep` 之后的所有节点 | 删除不再需要的依赖 |
+| 步骤       | 操作                                   | 目的                     |
+| ---------- | -------------------------------------- | ------------------------ |
+| startTrack | `depsTail = undefined`                 | 标记"从这里开始重新收集" |
+| link       | 复用匹配的节点                         | 保留仍然有效的依赖       |
+| endTrack   | 清理 `depsTail.nextDep` 之后的所有节点 | 删除不再需要的依赖       |
 
 这种设计的精妙之处在于：
 
@@ -296,9 +304,9 @@ export function effect(fn, options) {
 
 ```typescript
 effect(fn, {
-  scheduler: (runner) => {
+  scheduler: runner => {
     // 自定义调度逻辑
     queueJob(runner)
-  }
+  },
 })
 ```
