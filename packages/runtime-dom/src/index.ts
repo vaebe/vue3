@@ -1,2 +1,7 @@
 export * from '@vaebe-vue/runtime-core'
-export { nodeOps } from './nodeOps'
+import { nodeOps } from './nodeOps'
+import { patchProp } from './patchProp'
+
+const renderOptions = { ...nodeOps, patchProp }
+
+export { renderOptions }

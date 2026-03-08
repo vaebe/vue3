@@ -44,6 +44,9 @@ importers:
       '@vaebe-vue/runtime-core':
         specifier: workspace:*
         version: link:../runtime-core
+      '@vaebe-vue/shared':
+        specifier: workspace:*
+        version: link:../shared
 
   packages/shared: {}
 

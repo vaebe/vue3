@@ -18,6 +18,7 @@
   "author": "vaebe",
   "license": "MIT",
   "dependencies": {
-    "@vaebe-vue/runtime-core": "workspace:*"
+    "@vaebe-vue/runtime-core": "workspace:*",
+    "@vaebe-vue/shared": "workspace:*"
   }
 }

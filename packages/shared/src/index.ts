@@ -21,3 +21,10 @@ export const hasChanged = (newValue, oldValue) => !Object.is(newValue, oldValue)
  */
 export const isFunction = (val: unknown): val is Function =>
   typeof val === 'function'
+
+/**
+ * 判断是不是 on 开头的事件
+ * @param val
+ * @returns
+ */
+export const isOn = (val: string) => /^on[A-Z]/.test(val)
